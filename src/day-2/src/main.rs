@@ -7,8 +7,8 @@ enum CommandType {
 
 #[derive(Debug)]
 struct Command {
-    pub command: CommandType,
-    pub unit: i32
+    command: CommandType,
+    unit: i32
 }
 
 impl Command {
@@ -31,31 +31,51 @@ impl Command {
     }
 }
 
-fn solve_part_one(input_list: &Vec<Command>) -> i32 {
-    let (mut x, mut d) = (0, 0);
-    for input in input_list.iter() {
-        match input.command {
-            CommandType::FORWARD => x += input.unit,
-            CommandType::DOWN => d += input.unit,
-            CommandType::UP => d -= input.unit
-        }
-    }
-    x * d
+struct Submarine {
+    horizontal: i32,
+    depth: i32,
+    aim: i32,
 }
 
-fn solve_part_two(input_list: &Vec<Command>) -> i32 {           
-    let (mut x, mut d, mut aim) = (0, 0, 0);
-    for input in input_list.iter() {
-        match input.command {
-            CommandType::FORWARD => { 
-                x += input.unit;
-                d += aim * input.unit
-            },
-            CommandType::DOWN => aim += input.unit,
-            CommandType::UP => aim -= input.unit
+impl Submarine {
+    pub fn new(h: i32, d: i32, a: i32) -> Submarine {
+        Submarine {
+            horizontal: h,
+            depth: d,
+            aim: a
         }
     }
-    x * d
+
+    pub fn reset(&mut self) {
+        self.horizontal = 0;
+        self.depth = 0;
+        self.aim = 0;
+    }
+
+    pub fn solve_part_one(&mut self, input_list: &Vec<Command>) -> i32 {
+        for input in input_list.iter() {
+            match input.command {
+                CommandType::FORWARD => self.horizontal += input.unit,
+                CommandType::DOWN => self.depth += input.unit,
+                CommandType::UP => self.depth -= input.unit
+            }
+        }
+        self.horizontal * self.depth
+    }
+
+    pub fn solve_part_two(&mut self, input_list: &Vec<Command>) -> i32 {           
+        for input in input_list.iter() {
+            match input.command {
+                CommandType::FORWARD => { 
+                    self.horizontal += input.unit;
+                    self.depth += self.aim * input.unit
+                },
+                CommandType::DOWN => self.aim += input.unit,
+                CommandType::UP => self.aim -= input.unit
+            }
+        }
+        self.horizontal * self.depth
+    }
 }
 
 fn main() {
@@ -64,6 +84,9 @@ fn main() {
         .lines()
         .map(|f| Command::from_str(f))
         .collect();
-    println!("Day2 Part1: {}", solve_part_one(input_list.as_ref()));
-    println!("Day2 Part2: {}", solve_part_two(input_list.as_ref()));
+
+    let mut submarine = Submarine::new(0, 0, 0);
+    println!("Day2 Part1: {}", submarine.solve_part_one(input_list.as_ref()));
+    submarine.reset();
+    println!("Day2 Part2: {}", submarine.solve_part_two(input_list.as_ref()));
 }
